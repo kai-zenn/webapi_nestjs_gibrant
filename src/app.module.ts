@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { BookModule } from './book/book.module';
 import { UserModule } from './user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         autoLoadEntities: true,
         synchronize: true, // Ubah ke false jika tidak ingin auto-create tabel saat prod
         logging: true,
+        namingStrategy: new SnakeNamingStrategy(),
       }),
     }),
   ],

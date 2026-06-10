@@ -1,9 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { BookEntity } from './book.entity';
-import { CreateBookDTO } from './DTOs/create-book.dto';
+import { CreateBookDTO } from './dto/create-book.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UpdateBookDTO } from './DTOs/update-book.dto';
+import { UpdateBookDTO } from './dto/update-book.dto';
+import { UserEntity } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class BookService {
@@ -13,11 +18,14 @@ export class BookService {
   ) {}
 
   async findAll(): Promise<BookEntity[]> {
-    return await this.bookRepository.find();
+    return await this.bookRepository.find({ relations: ['author'] });
   }
 
   async findOne(id: number): Promise<BookEntity> {
-    const book = await this.bookRepository.findOneBy({ id });
+    const book = await this.bookRepository.findOne({
+      where: { id },
+      relations: ['author'],
+    });
 
     if (!book) {
       throw new NotFoundException(`Book with id ${id} not found`);
@@ -27,10 +35,23 @@ export class BookService {
 
   async create(dto: CreateBookDTO): Promise<BookEntity> {
     try {
-      const newBook = this.bookRepository.create(dto);
-      return await this.bookRepository.save(newBook);
+      const newBook = this.bookRepository.create({
+        title: dto.title,
+        description: dto.description,
+        author: { id: dto.authorId } as UserEntity,
+        publishedDate: dto.publishedDate
+          ? new Date(dto.publishedDate)
+          : undefined,
+      });
+
+      const savedBook = await this.bookRepository.save(newBook);
+
+      return await this.bookRepository.findOneOrFail({
+        where: { id: savedBook.id },
+        relations: ['author'],
+      });
     } catch (error) {
-      throw new Error(error);
+      throw new ConflictException('Gagal membuat buku', { cause: error });
     }
   }
 

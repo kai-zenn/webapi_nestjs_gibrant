@@ -1,5 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
-import { CreateDateColumn } from 'typeorm';
+import { UserEntity } from 'src/user/entities/user.entity';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { CreateDateColumn, JoinColumn } from 'typeorm';
 
 @Entity('books')
 export class BookEntity {
@@ -10,10 +11,11 @@ export class BookEntity {
   title: string;
 
   @Column()
-  description: string;
+  description?: string;
 
-  @Column()
-  author: string;
+  @ManyToOne(() => UserEntity, (user) => user.books, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'author_id' })
+  author: UserEntity;
 
   @Column({ type: 'date', nullable: true })
   publishedDate: Date;

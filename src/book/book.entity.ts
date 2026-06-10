@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
-import { CreateDateColumn } from 'typeorm/browser';
+import { CreateDateColumn } from 'typeorm';
 
 @Entity('books')
 export class BookEntity {
@@ -16,14 +16,11 @@ export class BookEntity {
   author: string;
 
   @Column({ type: 'date', nullable: true })
-  @Column()
   publishedDate: Date;
 
   @CreateDateColumn()
-  @Column()
   createdAt: Date;
 
   @CreateDateColumn()
-  @Column()
   updatedAt: Date;
 }

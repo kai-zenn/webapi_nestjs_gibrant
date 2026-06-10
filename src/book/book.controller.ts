@@ -1,7 +1,15 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  ConflictException,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { BookService } from './book.service';
-import { CreateBookDTO } from './DTOs/create-book.dto';
-import { UpdateBookDTO } from './DTOs/update-book.dto';
+import { CreateBookDTO } from './dto/create-book.dto';
+import { UpdateBookDTO } from './dto/update-book.dto';
 
 @Controller('/api/books')
 export class BookController {
@@ -10,9 +18,18 @@ export class BookController {
   async findAll() {
     try {
       const books = await this.bookService.findAll();
+      const mappedBooks = books.map((book) => ({
+        id: book.id,
+        title: book.title,
+        description: book.description,
+        author: book.author ? book.author.username : 'Unknown',
+        publishedDate: book.publishedDate,
+        createdAt: book.createdAt,
+        updatedAt: book.updatedAt,
+      }));
       return {
         success: true,
-        data: books,
+        data: mappedBooks,
         message: 'Data buku berhasil ditemukan',
       };
     } catch (error) {
@@ -27,9 +44,18 @@ export class BookController {
   async findOne(@Param('id') id: number) {
     try {
       const data = await this.bookService.findOne(+id);
+      const mappedData = {
+        id: data.id,
+        title: data.title,
+        description: data.description,
+        author: data.author ? data.author.username : 'Unknown',
+        publishedDate: data.publishedDate,
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
+      };
       return {
         success: true,
-        data,
+        data: mappedData,
         message: 'Data buku berhasil ditemukan',
       };
     } catch (error) {
@@ -45,13 +71,21 @@ export class BookController {
       const data = await this.bookService.create(book);
       return {
         success: true,
-        data,
+        data: {
+          id: data.id,
+          title: data.title,
+          description: data.description,
+          author: data.author ? data.author.username : 'Unknown',
+          publishedDate: data.publishedDate,
+          createdAt: data.createdAt,
+          updatedAt: data.updatedAt,
+        },
         message: 'Buku berhasil ditambahkan',
       };
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: new ConflictException('Gagal membuat buku', { cause: error }),
       };
     }
   }

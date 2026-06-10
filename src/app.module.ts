@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BookModule } from './book/book.module';
@@ -9,16 +10,24 @@ import { TypeOrmModule } from '@nestjs/typeorm';
   imports: [
     BookModule,
     UserModule,
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.POSTGRES_HOST,
-      port: parseInt(process.env.POSTGRES_PORT ?? '5432'),
-      password: process.env.POSTGRES_PASSWORD,
-      username: process.env.POSTGRES_USER,
-      entities: [],
-      database: process.env.POSTGRES_DATABASE,
-      synchronize: false,
-      logging: true,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get<string>('POSTGRES_HOST'),
+        port: parseInt(configService.get<string>('POSTGRES_PORT') ?? '5432'),
+        username: configService.get<string>('POSTGRES_USER'),
+        password: configService.get<string>('POSTGRES_PASSWORD'),
+        database: configService.get<string>('POSTGRES_DATABASE'),
+        entities: [],
+        autoLoadEntities: true,
+        synchronize: true, // Ubah ke false jika tidak ingin auto-create tabel saat prod
+        logging: true,
+      }),
     }),
   ],
   controllers: [AppController],

@@ -24,6 +24,13 @@ export class UserService {
       throw new InternalServerErrorException('Gagal membuat user baru', err);
     }
   }
+  async findByUsername(username: string): Promise<UserEntity> {
+    const user = await this.userRepository.findOne({ where: { username } });
+    if (!user) {
+      throw new NotFoundException(`User with username ${username} not found`);
+    }
+    return user;
+  }
   async findAll(): Promise<UserEntity[]> {
     return await this.userRepository.find();
   }

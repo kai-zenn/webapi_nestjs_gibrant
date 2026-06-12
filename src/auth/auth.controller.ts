@@ -1,6 +1,7 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { LoginRequestDTO } from './dto/login.dto';
 
 @Controller('api/auth')
 export class AuthController {
@@ -19,6 +20,17 @@ export class AuthController {
         createdAt: data.createdAt,
       },
       message: `Registrasi Berhasil selamat datang ${data.username}.`,
+    };
+  }
+
+  @Post('login')
+  async login(@Body() dto: LoginRequestDTO) {
+    const result = await this.authService.login(dto);
+
+    return {
+      success: true,
+      data: result,
+      message: 'Login Berhasil.',
     };
   }
 }

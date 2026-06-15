@@ -12,11 +12,19 @@ export class CommentService {
     @InjectRepository(CommentEntity)
     private readonly commentRepository: Repository<CommentEntity>,
   ) {}
-  async create(
-    dto: CreateCommentDTO,
-    // postId: number,
-    // userId: string,
-  ): Promise<CommentEntity> {
+  private mapComment(comment: CommentEntity) {
+    return {
+      id: comment.id,
+      body: comment.body,
+      user: {
+        id: comment.user?.id ?? null,
+        username: comment.user?.username ?? 'unknown',
+      },
+      postId: comment.post?.id ?? null,
+      createdAt: comment.createdAt,
+    };
+  }
+  async create(dto: CreateCommentDTO): Promise<CommentEntity> {
     const newComment = this.commentRepository.create({
       body: dto.body,
       user: { id: dto.userId } as UserEntity,
@@ -29,12 +37,14 @@ export class CommentService {
     });
   }
 
-  async findByPost(postId: number): Promise<CommentEntity[]> {
-    return await this.commentRepository.find({
+  async findByPost(postId: number) {
+    const comment = await this.commentRepository.find({
       where: { post: { id: postId } },
-      relations: ['user'],
+      relations: ['user', 'post'],
       order: { createdAt: 'DESC' },
     });
+
+    return comment.map((c) => this.mapComment(c));
   }
 
   async findAll(): Promise<CommentEntity[]> {

@@ -66,15 +66,6 @@ export class CommentController {
     };
   }
 
-  // @Get()
-  // async getCommentByPost(@Param('postId', ParseIntPipe) postId: number) {
-  //   const data = await this.commentService.findByPost(postId);
-  //   return {
-  //     success: true,
-  //     data,
-  //   };
-  // }
-
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
     const data = await this.commentService.findOne(id);

@@ -12,10 +12,14 @@ import { PostService } from './post.service';
 import { CreatePostDTO } from './dto/create-post.dto';
 import { UpdatePostDTO } from './dto/update-post.dto';
 import { PostEntity } from './entities/post.entity';
+import { CommentService } from 'src/comment/comment.service';
 
 @Controller('/api/posts')
 export class PostController {
-  constructor(private readonly postService: PostService) {}
+  constructor(
+    private readonly postService: PostService,
+    private readonly commentService: CommentService,
+  ) {}
   private mapPost(post: PostEntity) {
     return {
       id: post.id,
@@ -44,6 +48,14 @@ export class PostController {
       success: true,
       data: this.mapPost(data),
       message: 'Data post berhasil ditemukan',
+    };
+  }
+  @Get(':postId/comments')
+  async findCommentByPost(@Param('postId', ParseIntPipe) postId: number) {
+    const data = await this.commentService.findByPost(postId);
+    return {
+      success: true,
+      data,
     };
   }
   @Post()

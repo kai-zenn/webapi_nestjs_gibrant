@@ -59,7 +59,7 @@ export class PostService {
   async remove(id: number): Promise<{ message: string }> {
     const result = await this.postRepository.delete(id);
     if (result.affected === 0) {
-      throw new NotFoundException(`User with id ${id} not found`);
+      throw new NotFoundException(`Post tidak dapat ditemukan`);
     }
     return { message: 'Post berhasil dihapus' };
   }

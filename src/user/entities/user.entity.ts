@@ -27,7 +27,10 @@ export class UserEntity {
   @Column({ name: 'email' })
   email: string;
 
-  @Column({ name: 'password' })
+  @Column({
+    name: 'password',
+    select: false,
+  })
   password: string;
 
   @CreateDateColumn()

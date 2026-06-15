@@ -64,6 +64,6 @@ export class UserService {
     if (result.affected === 0) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
-    return { message: `User dengan id ${id} berhasil dihapus` };
+    return { message: 'User berhasil dihapus' };
   }
 }

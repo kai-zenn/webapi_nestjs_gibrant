@@ -15,7 +15,7 @@ export class AuthController {
       success: true,
       data: {
         id: data.id,
-        usename: data.username,
+        username: data.username,
         email: data.email,
         createdAt: data.createdAt,
       },

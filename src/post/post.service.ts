@@ -48,9 +48,12 @@ export class PostService {
   }
 
   async update(id: number, dto: UpdatePostDTO): Promise<PostEntity> {
-    const existingPost = await this.postRepository.findOneBy({ id });
+    const existingPost = await this.postRepository.findOne({
+      where: { id },
+      relations: ['author'],
+    });
     if (!existingPost) {
-      throw new NotFoundException(`Post with id ${id} not found`);
+      throw new NotFoundException('Post with not found');
     }
     const postData = this.postRepository.merge(existingPost, dto);
     return this.postRepository.save(postData);

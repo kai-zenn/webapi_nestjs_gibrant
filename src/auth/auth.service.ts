@@ -19,13 +19,7 @@ export class AuthService {
 
   async register(dto: CreateUserDto) {
     try {
-      const { password, ...rest } = dto;
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-      return await this.userService.create({
-        ...rest,
-        password: hashedPassword,
-      });
+      return await this.userService.create(dto);
     } catch (error) {
       throw new InternalServerErrorException(`
         gagal mendaftar karena: ${error}`);

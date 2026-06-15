@@ -17,7 +17,6 @@ export class UserService {
   ) {}
   async create(createUserDto: CreateUserDto): Promise<UserEntity> {
     try {
-      console.log(createUserDto);
       const newUser = this.userRepository.create(createUserDto);
       return await this.userRepository.save(newUser);
     } catch (err) {
@@ -60,11 +59,11 @@ export class UserService {
     }
   }
 
-  async remove(id: string): Promise<void> {
-    const user = await this.userRepository.findOneBy({ id });
-    if (!user) {
+  async remove(id: string): Promise<{ message: string }> {
+    const result = await this.userRepository.delete(id);
+    if (result.affected === 0) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
-    await this.userRepository.remove(user);
+    return { message: `User dengan id ${id} berhasil dihapus` };
   }
 }

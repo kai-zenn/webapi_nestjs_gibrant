@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { BookModule } from './book/book.module';
+import { PostModule } from './post/post.module';
 import { UserModule } from './user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
@@ -10,7 +10,7 @@ import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
-    BookModule,
+    PostModule,
     UserModule,
     ConfigModule.forRoot({
       isGlobal: true,
@@ -28,6 +28,7 @@ import { AuthModule } from './auth/auth.module';
         entities: [],
         autoLoadEntities: true,
         synchronize: true, // Ubah ke false jika tidak ingin auto-create tabel saat prod
+        // dropSchema: false,
         logging: true,
         namingStrategy: new SnakeNamingStrategy(),
       }),

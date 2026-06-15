@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { BookEntity } from './book.entity';
+import { BookEntity } from './entities/book.entity';
 import { CreateBookDTO } from './dto/create-book.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';

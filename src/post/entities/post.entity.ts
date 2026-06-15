@@ -1,3 +1,4 @@
+import { CommentEntity } from 'src/comment/entities/comment.entity';
 import { UserEntity } from 'src/user/entities/user.entity';
 import {
   Entity,
@@ -5,6 +6,7 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { CreateDateColumn, JoinColumn } from 'typeorm';
 
@@ -25,6 +27,9 @@ export class PostEntity {
 
   @Column({ type: 'date', nullable: true })
   publishedDate: Date;
+
+  @OneToMany(() => CommentEntity, (comment) => comment.post)
+  comments: CommentEntity[];
 
   @CreateDateColumn()
   createdAt: Date;

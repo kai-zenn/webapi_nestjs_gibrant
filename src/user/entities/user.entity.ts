@@ -1,4 +1,8 @@
+<<<<<<< Updated upstream
 import { BookEntity } from 'src/book/book.entity';
+=======
+import { PostEntity } from 'src/post/entities/post.entity';
+>>>>>>> Stashed changes
 import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
@@ -6,7 +10,9 @@ import {
   Entity,
   UpdateDateColumn,
   OneToMany,
+  BeforeInsert,
 } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 
 @Entity('users')
 export class UserEntity {
@@ -34,6 +40,11 @@ export class UserEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @OneToMany(() => BookEntity, (book) => book.author)
-  books: BookEntity[];
+  @OneToMany(() => PostEntity, (post) => post.author)
+  posts: PostEntity[];
+
+  @BeforeInsert()
+  async hashPassword() {
+    this.password = await bcrypt.hash(this.password, 10);
+  }
 }

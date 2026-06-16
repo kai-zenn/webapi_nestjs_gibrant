@@ -23,8 +23,12 @@ export class UserService {
       throw new InternalServerErrorException('Gagal membuat user baru', err);
     }
   }
-  async findByUsername(username: string): Promise<UserEntity> {
-    const user = await this.userRepository.findOne({ where: { username } });
+
+  async findForLogin(username: string): Promise<UserEntity> {
+    const user = await this.userRepository.findOne({
+      where: { username },
+      select: ['id', 'username', 'email', 'password'],
+    });
     if (!user) {
       throw new NotFoundException(`User with username ${username} not found`);
     }

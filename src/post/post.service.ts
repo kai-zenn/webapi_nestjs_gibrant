@@ -29,11 +29,11 @@ export class PostService {
     return post;
   }
 
-  async create(dto: CreatePostDTO): Promise<PostEntity> {
+  async create(dto: CreatePostDTO, userId: string): Promise<PostEntity> {
     const newPost = this.postRepository.create({
       title: dto.title,
       content: dto.content,
-      author: { id: dto.authorId } as UserEntity,
+      author: { id: userId } as UserEntity,
       publishedDate: dto.publishedDate
         ? new Date(dto.publishedDate)
         : undefined,

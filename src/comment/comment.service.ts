@@ -12,7 +12,7 @@ export class CommentService {
     @InjectRepository(CommentEntity)
     private readonly commentRepository: Repository<CommentEntity>,
   ) {}
-  private mapComment(comment: CommentEntity) {
+  public mapComment(comment: CommentEntity) {
     return {
       id: comment.id,
       body: comment.body,
@@ -24,11 +24,16 @@ export class CommentService {
       createdAt: comment.createdAt,
     };
   }
-  async create(dto: CreateCommentDTO): Promise<CommentEntity> {
+
+  async create(
+    dto: CreateCommentDTO,
+    postId: number,
+    userId: string,
+  ): Promise<CommentEntity> {
     const newComment = this.commentRepository.create({
       body: dto.body,
-      user: { id: dto.userId } as UserEntity,
-      post: { id: dto.postId } as PostEntity,
+      user: { id: userId } as UserEntity,
+      post: { id: postId } as PostEntity,
     });
     const savedComment = await this.commentRepository.save(newComment);
     return this.commentRepository.findOneOrFail({

@@ -11,7 +11,8 @@ export class CreatePostDTO {
   @IsString()
   title: string;
 
-  @IsString({ message: 'Isi konten tidak boleh kosong' })
+  @IsNotEmpty({ message: 'Isi konten tidak boleh kosong' })
+  @IsString()
   content: string;
 
   @IsUUID()

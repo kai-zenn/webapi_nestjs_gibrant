@@ -1,19 +1,17 @@
 import {
   Controller,
   Get,
-  Post,
   Body,
-  // Patch,
   Param,
   Delete,
   ParseIntPipe,
-  // Req,
   Patch,
+  UseGuards,
 } from '@nestjs/common';
 import { CommentService } from './comment.service';
-import { CreateCommentDTO } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CommentEntity } from './entities/comment.entity';
+import { JwtAuthGuard } from 'src/auth/auth.guard';
 
 @Controller('/api/comments')
 export class CommentController {
@@ -29,31 +27,6 @@ export class CommentController {
       postId: comment.post?.id ?? null,
       createdAt: comment.createdAt,
     };
-  }
-  @Post()
-  async create(
-    // @Param('postId', ParseIntPipe) postId: number,
-    @Body() dto: CreateCommentDTO,
-    // @Req() req: any,
-  ) {
-    const data = await this.commentService.create(dto);
-    const map = this.mapComment(data);
-    return {
-      success: true,
-      data: [map],
-      message: 'Komentar berhasil dipost',
-    };
-    // const userId = req.user.userId;
-    // const data = await this.commentService.create(dto, postId, userId);
-    // return {
-    //   success: true,
-    //   data: {
-    //     id: data.id,
-    //     body: data.body,
-    //     username: data.user.username,
-    //     createdAt: data.createdAt,
-    //   },
-    //   message: 'Komentar berhasil ditambahkan',
   }
 
   @Get()
@@ -77,6 +50,7 @@ export class CommentController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateCommentDto,
@@ -91,6 +65,7 @@ export class CommentController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   async remove(@Param('id', ParseIntPipe) id: number) {
     await this.commentService.remove(id);
     return { success: true, message: 'Komentar berhasil dihapus' };

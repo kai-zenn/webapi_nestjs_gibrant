@@ -7,12 +7,16 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDTO } from './dto/create-post.dto';
 import { UpdatePostDTO } from './dto/update-post.dto';
 import { PostEntity } from './entities/post.entity';
 import { CommentService } from 'src/comment/comment.service';
+import { JwtAuthGuard } from 'src/auth/auth.guard';
+import { CreateCommentDTO } from 'src/comment/dto/create-comment.dto';
 
 @Controller('/api/posts')
 export class PostController {
@@ -59,15 +63,31 @@ export class PostController {
     };
   }
   @Post()
-  async create(@Body() post: CreatePostDTO) {
-    const data = await this.postService.create(post);
+  @UseGuards(JwtAuthGuard)
+  async create(@Body() dto: CreatePostDTO, @Req() req: any) {
+    const userId = req.user.userId;
+    const data = await this.postService.create(dto, userId);
     return {
       success: true,
       data: this.mapPost(data),
       message: 'Postingan berhasil ditambahkan',
     };
   }
+  @Post(':postId/comments')
+  @UseGuards(JwtAuthGuard)
+  async createComment(
+    @Param('postId', ParseIntPipe) postId: number,
+    @Body() dto: CreateCommentDTO,
+    @Req() req: any,
+  ) {
+    const userId = req.user.userId;
+    const data = await this.commentService.create(dto, postId, userId);
+    const map = this.commentService.mapComment(data);
+
+    return { success: true, data: [map], message: 'Komentar berhasil dipost' };
+  }
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
   async update(@Param('id') id: number, @Body() post: UpdatePostDTO) {
     const data = await this.postService.update(+id, post);
     return {
@@ -77,6 +97,7 @@ export class PostController {
     };
   }
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   remove(@Param('id') id: number) {
     return this.postService.remove(id);
   }

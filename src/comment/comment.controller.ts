@@ -13,7 +13,7 @@ import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CommentEntity } from './entities/comment.entity';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
 
-@Controller('/api/comments')
+@Controller('comments')
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}
   private mapComment(comment: CommentEntity) {

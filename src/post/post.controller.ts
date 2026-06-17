@@ -18,7 +18,7 @@ import { CommentService } from 'src/comment/comment.service';
 import { JwtAuthGuard } from 'src/auth/auth.guard';
 import { CreateCommentDTO } from 'src/comment/dto/create-comment.dto';
 
-@Controller('/api/posts')
+@Controller('posts')
 export class PostController {
   constructor(
     private readonly postService: PostService,

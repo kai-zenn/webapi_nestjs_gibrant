@@ -1,98 +1,112 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Dokumentasi Headless CMS REST API: Manajemen Blog dan Komentar Menggunakan NestJS
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Projek ini merupakan implementasi backend berbasis REST API yang dibangun menggunakan framework **NestJS**, **TypeORM**, dan **Passport.js (JWT)**. Sistem ini dirancang untuk mengelola data pengguna (*User*), postingan (*Post*), dan komentar (*Comment*) dengan menerapkan prinsip arsitektur modular, enkapsulasi, serta pengamanan rute (*Guarded Endpoints*).
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## Teknologi Utama
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Aplikasi ini dikembangkan dengan memanfaatkan ekosistem teknologi berikut:
+* **Framework Backend:** NestJS (v10.x) & TypeScript
+* **Object-Relational Mapping (ORM):** TypeORM
+* **Sistem Autentikasi:** Passport.js & `@nestjs/jwt`
+* **Validasi Data:** `class-validator` & `class-transformer`
+* **Database Platform:** PostgreSQL / MySQL
 
-## Project setup
+---
 
-```bash
-$ npm install
+## Arsitektur & Fitur Unggulan
+
+### 1. Autentikasi Robust Berbasis JWT
+Sistem mengamankan rute sensitif menggunakan `JwtAuthGuard`. Berkat integrasi dengan registry global Passport.js, strategi validasi token dilaunch secara efisien. Pengguna tidak perlu mengirimkan `authorId` atau `userId` secara manual di dalam *request body* pada endpoint terproteksi; data identitas ditarik secara aman langsung dari dekripsi payload JWT di sisi server.
+
+### 2. Nested Routing (Rute Bertingkat)
+Untuk merepresentasikan relasi entitas secara logis dalam protokol RESTful, pembuatan komentar baru diimplementasikan menggunakan rute bertingkat:
+`POST /api/posts/:postId/comments`
+Hal ini memastikan bahwa setiap komentar baru secara eksplisit terikat pada ID postingan yang valid melalui parameter URL.
+
+### 3. Database Cascade Delete
+Sistem memanfaatkan fitur *Cascade* pada relasi entitas TypeORM. Ketika sebuah rute penghapusan postingan (`DELETE /api/posts/:id`) dieksekusi, database secara otomatis akan menghapus seluruh data komentar yang terelasi dengan postingan tersebut guna menjaga integritas data dan mencegah adanya *orphan data*.
+
+### 4. Validasi Global (Validation Pipe)
+Seluruh data yang masuk melalui rute *write* (`POST`/`PATCH`) divalidasi secara ketat menggunakan `ValidationPipe` global. Setiap parameter dipetakan melalui *Data Transfer Object* (DTO) untuk memastikan tipe data sesuai dan mencegah malformed request yang dapat memicu *unhandled server error*.
+
+---
+
+## Struktur Koleksi Postman
+
+Untuk mempermudah proses peninjauan (*review*), koleksi request pada Postman dibagi secara terstruktur ke dalam beberapa folder berdasarkan fase pengembangannya:
+
+1. **`User CRUD (basic)`**
+   * Berisi operasi dasar manajemen user (Create, Read, Update, Delete) tanpa proteksi token.
+2. **`Post CRUD (basic)` & `Comment CRUD (basic)`**
+   * Merupakan riwayat teknik request polosan sebelum dipasang sistem keamanan. 
+   * *Catatan: Endpoint manipulasi data (Write/Delete) di folder basic ini sudah tidak dapat digunakan dan dialihkan ke folder Guarded.*
+3. **`Auth > Basic`**
+   * Menyediakan rute `POST /api/auth/register` (dengan enkripsi password menggunakan Bcrypt) dan `POST /api/auth/login` untuk menghasilkan JWT Token.
+4. **`Auth > Guarded Endpoint`**
+   * Folder produksi utama yang berisi endpoint aktif (Post & Comment bertingkat) yang dilindungi oleh `JwtAuthGuard`. Setiap request di folder ini wajib melampirkan *Bearer Token* pada Authorization Header.
+
+---
+
+## Tautan Dokumentasi API
+
+Dokumentasi lengkap yang memuat specifications rute, struktur skema request body, beserta contoh respons (*success* dan *error code*) dapat diakses secara daring melalui tautan berikut:
+
+**[Halaman Dokumentasi Resmi Postman](https://documenter.getpostman.com/view/45183766/2sBXwtp9B7)**
+
+---
+
+## Konfigurasi Environment Variables
+
+Sebelum menjalankan aplikasi, buatlah sebuah file bernama `.env` pada direktori utama (*root*) projek ini, kemudian lakukan penyesuaian nilai berdasarkan konfigurasi database lokal Anda:
+
+```env
+# Konfigurasi Server
+PORT=3000
+
+# Konfigurasi Database
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_USER=postgres
+DATABASE_PASSWORD=rahasia_database_anda
+DATABASE_NAME=nestjs_blog_db
+
+# Konfigurasi Keamanan JWT
+JWT_SECRET=kunci_rahasia_jwt_anda_yang_kompleks
+JWT_EXPIRY=1d
 ```
 
-## Compile and run the project
+---
 
+## Langkah Instalasi & Penggunaan
+
+Ikuti instruksi berikut untuk melakukan instalasi dan menjalankan projek ini di lingkungan lokal Anda:
+
+### 1. Kloning Repositori
+Unduh source code projek ini dari GitHub ke direktori lokal Anda:
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+git clone <https://github.com/kai-zenn/webapi_nestjs_gibrant>
+cd <NAMA_FOLDER_PROJECT>
 ```
 
-## Run tests
-
+### 2. Inisialisasi Dependensi
+Unduh dan pasang seluruh pustaka (*dependencies*) yang dibutuhkan oleh projek menggunakan Node Package Manager (NPM):
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm install
 ```
 
-## Deployment
+### 3. Konfigurasi Database & Environment
+* Pastikan service database Anda (PostgreSQL/MySQL) sudah menyala di lokal.
+* Buat database baru di platform database Anda sesuai dengan nama yang ditentukan di file `.env` (contoh: `nestjs_blog_db`).
+* Pastikan isi file `.env` sudah disesuaikan dengan kredensial database lokal Anda.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
+### 4. Menjalankan Aplikasi
+Eksekusi aplikasi dalam mode pengembangan (*development mode*). Fitur *hot-reload* akan aktif secara otomatis untuk memantau setiap perubahan kode tanpa perlu restart server manual:
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm run start:dev
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Setelah berhasil dijalankan, server backend akan aktif dan siap menerima request pada alamat: `http://localhost:3000`. Anda dapat langsung melakukan pengujian rute menggunakan tautan dokumentasi Postman yang tertera di atas.
 
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+---

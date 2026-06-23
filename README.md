@@ -15,21 +15,40 @@ Aplikasi ini dikembangkan dengan memanfaatkan ekosistem teknologi berikut:
 
 ---
 
-## Arsitektur & Fitur Unggulan
+## Pola Arsitektur & Alasan Pemilihan
+
+Projek ini menerapkan **Modular Layered Architecture** (bawaan industri NestJS) yang dikombinasikan dengan **Repository Pattern** dari TypeORM. Berikut adalah alasan teknis mengapa pattern ini dipilih untuk menyelesaikan kriteria tugas:
+
+1. **Separation of Concerns (Pemisahan Tanggung Jawab Kode)**
+   Dengan membagi kode menjadi 3 layer utama (Controller, Service, dan Repository), setiap berkas hanya fokus pada satu tugas:
+   * **Controller:** Hanya mengurusi HTTP Request, HTTP Method, Validasi DTO, dan HTTP Response.
+   * **Service:** Fokus 100% pada aturan bisnis (business logic) seperti enkripsi password dan pengecekan hak akses.
+   * **Repository:** Mengisolasi query ke database SQL melalui TypeORM.
+   * *Alasan:* Pemisahan ini memastikan kode tidak menjadi "Spaghetti Code" dan mempermudah pelacakan jika terjadi bug.
+
+2. **Modularisasi Tinggi (High Encapsulation & Scalability)**
+   Setiap modul (`AuthModule`, `UserModule`, `PostModule`, `CommentModule`) bersifat independen dan membungkus komponennya sendiri. 
+   * *Alasan:* Memudahkan pengembangan paralel jika dikerjakan dalam tim. Jika fitur `Comment` membutuhkan perubahan, developer tidak akan mengganggu atau merusak modul `Auth`.
+
+3. **Kemudahan Pengujian Otomatis (Testability - Menjawab Poin 1d)**
+   Karena dependensi antar-layer disuntikkan secara dinamis menggunakan *Dependency Injection* (DI), modul-modul ini sangat mudah untuk diisolasi.
+   * *Alasan:* Pola arsitektur ini yang melandasi mengapa fitur **E2E Testing** (`test/auth.e2e-spec.ts`) dalam projek ini dapat menguji alur token JWT dari hulu ke hilir dengan bersih tanpa merusak data asli atau bentrok dengan *lifecycle* aplikasi utama.
+
+---
+
+## Fitur Unggulan Implementasi Sistem
 
 ### 1. Autentikasi Robust Berbasis JWT
-Sistem mengamankan rute sensitif menggunakan `JwtAuthGuard`. Berkat integrasi dengan registry global Passport.js, strategi validasi token dilaunch secara efisien. Pengguna tidak perlu mengirimkan `authorId` atau `userId` secara manual di dalam *request body* pada endpoint terproteksi; data identitas ditarik secara aman langsung dari dekripsi payload JWT di sisi server.
+Sistem mengamankan rute sensitif menggunakan `JwtAuthGuard`. Berkat integrasi dengan registry global Passport.js, strategi validasi token dilaunch secara efisien. Pengguna tidak perlu mengirimkan `authorId` atau `userId` secara manual di dalam *request body*; data identitas ditarik secara aman langsung dari dekripsi payload JWT di sisi server.
 
-### 2. Nested Routing (Rute Bertingkat)
-Untuk merepresentasikan relasi entitas secara logis dalam protokol RESTful, pembuatan komentar baru diimplementasikan menggunakan rute bertingkat:
-`POST /api/posts/:postId/comments`
-Hal ini memastikan bahwa setiap komentar baru secara eksplisit terikat pada ID postingan yang valid melalui parameter URL.
+### 2. Nested Routing (Rute Bertingkat) & Relasi (2 CRUD)
+Terdapat 2 entitas utama yang saling berkaitan yaitu `Post` dan `Comment`. Pembuatan komentar diimplementasikan menggunakan rute bertingkat: `POST /api/posts/:postId/comments`. Hal ini memastikan bahwa setiap komentar baru secara eksplisit terikat pada ID postingan yang valid melalui parameter URL.
 
 ### 3. Database Cascade Delete
 Sistem memanfaatkan fitur *Cascade* pada relasi entitas TypeORM. Ketika sebuah rute penghapusan postingan (`DELETE /api/posts/:id`) dieksekusi, database secara otomatis akan menghapus seluruh data komentar yang terelasi dengan postingan tersebut guna menjaga integritas data dan mencegah adanya *orphan data*.
 
-### 4. Validasi Global (Validation Pipe)
-Seluruh data yang masuk melalui rute *write* (`POST`/`PATCH`) divalidasi secara ketat menggunakan `ValidationPipe` global. Setiap parameter dipetakan melalui *Data Transfer Object* (DTO) untuk memastikan tipe data sesuai dan mencegah malformed request yang dapat memicu *unhandled server error*.
+### 4. E2E Testing untuk Endpoint Token API
+Projek ini dilengkapi dengan pengujian *End-to-End* (`test/auth.e2e-spec.ts`) yang memvalidasi alur registrasi, penerbitan JWT token saat login, dan pembatasan akses (*Unauthorized error*) pada endpoint yang dijaga oleh guard.
 
 ---
 
